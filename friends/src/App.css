@@ -31,3 +31,20 @@
     transform: rotate(360deg);
   }
 }
+ul {
+  display: flex;
+  margin: 0 auto;
+  justify-content: flex-end;
+}
+
+li {
+  text-decoration: none;
+  list-style-type: none;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+li:hover {
+  border: 1px solid #624294;
+
+}
