@@ -1,42 +1,81 @@
-import React from 'react';
-import Loader from 'react-loader-spinner';
-import axiosWithAuth from '../utils/axiosWithAuth.js';
-import FriendCard from './FriendCard.js';
-import AddFriend from './AddFriend.js';
+import React, { useEffect, useState } from 'react';
+import axiosWithAuth from '../utils/axiosWithAuth';
+import '../App.css';
 
-class FriendsList extends React.Component {
-  state = {
-    friends: []
-  };
 
-  componentDidMount() {
-    this.getData();
-  }
+function FriendsList (props) {
+    const [friends, setFriends] = useState([]);
+    const [newFriend, setNewFriend] = useState({
+        id: Date.now(),
+        name: '',
+        age: '',
+        email: ''
+    });
 
-  getData = () => {
-    axiosWithAuth()
-      .get('http://localhost:5000/api/friends')
-      // .then(res => console.log(res.data))
-      .then(res => this.setState({ friends: res.data}))
-      .catch(err => console.log(err.response));
-  };
+    function handleChanges (e) {
+        setNewFriend({...newFriend, [e.target.name]: e.target.value});
+    };
 
-  render() {
-    if (this.state.friends.length < 1) {
-      return <Loader type='TailSpin' color='#00BFFF' height={100} width={100} />
-    }
+    function addNewFriend(e){
+        e.preventDefault();
+        axiosWithAuth()
+            .post('http://localhost:5000/api/friends', newFriend)
+            .then(res=> setFriends(res.data))
+            .catch(err => console.log('error response in attempt to post new friend: ', err.response));
+        setNewFriend({
+            id: Date.now(),
+            name: '',
+            age: '',
+            email: ''
+        })
+    };
+
+
+    useEffect(() => {
+
+        axiosWithAuth()
+        .get('http://localhost:5000/api/friends')
+        .then(res => {
+            // console.log('friends get response: ', res);
+            setFriends(res.data);
+        })
+        .catch(err => console.log("Uh oh! Error displaying friends: ", err.response.status, err.response.data.error));
+
+    }, []);
 
     return (
-      <div className='friends'>
-        <AddFriend getData={this.getData} />
-        <div className='friends-list'>
-          Your Friends
-        {this.state.friends.length > 0 ? this.state.friends.map(friend => <FriendCard key={friend.id} friend={friend} getData={this.getData} />) : null}
+        <div className="here2">
+        <h1>MY FAM</h1>
+        <div className="fr">
+        {friends.map(friend => (
+            <p key={friend.id}> {friend.name} is {friend.age} years old and we talk business all the time at {friend.email} ya dig.</p>
+        ))}</div>
+        <br/>
+        <h2>Wanna be a homie??</h2>
+        <div className="here">
+            <form onSubmit={addNewFriend}>
+                <label>Name
+                    <br/>
+                    <input type='text' name='name' placeholder='Name' value={newFriend.name} onChange={handleChanges}></input>
+                </label>
+                <br/>
+                <label>how old are you?
+                    <br/>
+                    <input type='number' name='age' value={newFriend.age} placeholder='age' onChange={handleChanges}></input>
+                </label>
+                <br/>
+                <label>Gimme that email ya dig?
+                    <br/>
+                    <input type='text' name='email' value={newFriend.email} placeholder='email address' onChange={handleChanges}></input>
+                </label>
+                <br/>
+                <button>Join </button>
+            </form>
+            </div>
         </div>
-      </div>
-      
-    )
-  }
+    );
+    
 }
+
 
 export default FriendsList;

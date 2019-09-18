@@ -1,76 +1,73 @@
-  
-import React from 'react';
-// import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import axios from 'axios';
-import Loader from 'react-loader-spinner';
 
-class LoginForm extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      credentials: {
+export default function Login (props) {
+    const [creds, setCreds] = useState({
         username: '',
         password: ''
-      },
-      isLoading: false,
-      isLoaded: false
+    });
+    const [loginStatus, setLoginStatus] = useState('');
+    
+    function handleChange(e){
+        setCreds({...creds, [e.target.name]: e.target.value });
     }
-  }
-  
 
-  handleChange = event => {
-    this.setState({
-      ...this.state,
-      credentials: {
-        ...this.state.credentials,
-        [event.target.name]: event.target.value
-      }
-    })
-  }
-
-  handleLogin = event => {
-    event.preventDefault();
-    // this.setState({ ...this.state, isLoading: true })
-    axios
-      .post('http://localhost:5000/api/login', this.state.credentials)
-      .then(res => {
-        localStorage.setItem('token', res.data.payload)
-        this.props.history.push('/friends')})
-      .catch(err => console.log(err.response));
-  }
-
-  render() {
+    function login(e){
+        e.preventDefault();
+        axios
+            .post(' http://localhost:5000/api/login', creds)
+            .then(res => {
+                // console.log(res)
+                localStorage.setItem('token', res.data.payload);
+                setCreds({
+                    username: '',
+                    password: ''
+                });
+                setLoginStatus('OK then, welcome friend');
+                props.history.push("/protected");
+            })
+            .catch(err => {
+                console.log(err.response.data.error);
+                setLoginStatus(err.response.data.error);
+                setCreds({
+                    username: '',
+                    password: ''
+                })
+            });
+    }
+    
     return (
-      <>
-        {this.state.isLoading ? (
-          <Loader type='TailSpin' color='#00BFFF' height={100} width={100} />
-        ) : (
-          <div className='login-form'>
-            <h1>Login Form</h1>
-            <form onSubmit={this.handleLogin}>
-              <input
-                type='text'
-                name='username'
-                placeholder='username'
-                value={this.state.credentials.username}
-                onChange={this.handleChange}
-              />
-              <input
-                type='password'
-                name='password'
-                placeholder='password'
-                value={this.state.credentials.password}
-                onChange={this.handleChange}
-              />
-              {/* <Link to='/login'> */}
-              <button type='submit'>Log in</button>
-              {/* </Link> */}
+        <div className= "forme">
+            <h1>THIS APP IS FOR CERTIFIED ONLY</h1>
+            
+                
+            
+            <form onSubmit={login}>
+                <label htmlFor="username">Username: 
+                <br/>
+                <input
+                    type="text"
+                    name="username"
+                    value={creds.username}
+                    onChange={handleChange}
+                />
+                </label>
+                <br/>
+                <label htmlFor="password">Password: 
+                <br/>
+                <input 
+                    type="password"
+                    name="password"
+                    value={creds.password}
+                    onChange={handleChange}
+                />
+                </label>
+                <br/>
+                <button >LOGIN</button>
+                <p>{loginStatus}</p>
             </form>
-          </div>
-        )}
-      </>
-    )
-  }
-}
+        </div>
+    );
+    
 
-export default LoginForm;
+}
