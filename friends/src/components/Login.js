@@ -23,7 +23,7 @@ export default function Login (props) {
                     username: '',
                     password: ''
                 });
-                setLoginStatus('OK then, welcome friend');
+                setLoginStatus('OK theeen, welcome friend');
                 props.history.push("/protected");
             })
             .catch(err => {
